@@ -1,0 +1,330 @@
+﻿<Window x:Class="QuickTechSystems.WPF.Views.AttendanceManagementWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:QuickTechSystems.WPF.Converters"
+        Title="Attendance Management"
+        Height="700"
+        Width="1000"
+        MinHeight="600"
+        MinWidth="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#F9FAFB">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
+
+        <Style x:Key="WindowCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="20" Direction="270" ShadowDepth="4" Opacity="0.15"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+
+        <Style x:Key="InputLabel" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style x:Key="InputField" TargetType="TextBox">
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Height" Value="40"/>
+            <Style.Triggers>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="#3B82F6"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#3B82F6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="6" 
+                                BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2563EB"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#1D4ED8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#EF4444"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#DC2626"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#6B7280"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#4B5563"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource WindowCard}" Margin="0,0,0,20" Padding="24">
+            <StackPanel>
+                <TextBlock Text="{Binding EmployeeFullName, Mode=OneWay, StringFormat='Attendance Management - {0}'}" 
+                           FontSize="24" 
+                           FontWeight="Bold" 
+                           Foreground="#1F2937"
+                           Margin="0,0,0,24"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Date" Style="{StaticResource InputLabel}"/>
+                        <DatePicker SelectedDate="{Binding SelectedDate}" 
+                                   Height="40" 
+                                   Margin="0,0,0,16"
+                                   BorderBrush="#D1D5DB"/>
+
+                        <TextBlock Text="Start Time" Style="{StaticResource InputLabel}"/>
+                        <TextBox Text="{Binding StartTime, Converter={StaticResource TimeSpanToStringConverter}}" 
+                                Style="{StaticResource InputField}"/>
+
+                        <TextBlock Text="Hourly Rate" Style="{StaticResource InputLabel}"/>
+                        <TextBox Text="{Binding HourlyRate}" Style="{StaticResource InputField}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Employee" Style="{StaticResource InputLabel}"/>
+                        <TextBox Text="{Binding EmployeeFullName, Mode=OneWay}" 
+                                Style="{StaticResource InputField}"
+                                IsReadOnly="True"
+                                Background="#F3F4F6"/>
+
+                        <TextBlock Text="End Time" Style="{StaticResource InputLabel}"/>
+                        <TextBox Text="{Binding EndTime, Converter={StaticResource TimeSpanToStringConverter}}" 
+                                Style="{StaticResource InputField}"/>
+
+                        <TextBlock Text="Standard Hours" Style="{StaticResource InputLabel}"/>
+                        <TextBox Text="{Binding StandardDailyHours}" Style="{StaticResource InputField}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Overtime Multiplier" Style="{StaticResource InputLabel}"/>
+                        <TextBox Text="{Binding OvertimeMultiplier}" Style="{StaticResource InputField}"/>
+
+                        <Border Background="#F8FAFC" 
+                               BorderBrush="#E5E7EB" 
+                               BorderThickness="1" 
+                               CornerRadius="6" 
+                               Padding="16" 
+                               Margin="0,16,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Calculated Values" 
+                                          FontWeight="Bold" 
+                                          Foreground="#374151"
+                                          Margin="0,0,0,8"/>
+                                <TextBlock Text="{Binding CalculatedTotalHours, Mode=OneWay, StringFormat='Total Hours: {0:F2}'}" 
+                                          Margin="0,2" FontSize="12"/>
+                                <TextBlock Text="{Binding CalculatedOvertimeHours, Mode=OneWay, StringFormat='Overtime: {0:F2}'}" 
+                                          Margin="0,2" FontSize="12" Foreground="#F59E0B"/>
+                                <TextBlock Text="{Binding CalculatedTotalPay, Mode=OneWay, StringFormat='Total Pay: {0:C2}'}" 
+                                          Margin="0,2" FontSize="12" FontWeight="Bold" Foreground="#10B981"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                    <Button Content="Save Attendance" 
+                            Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SaveAttendanceCommand}"
+                            Margin="0,0,12,0"/>
+
+                    <Button Content="Clear Form" 
+                            Style="{StaticResource SecondaryButton}"
+                            Command="{Binding ClearFormCommand}"
+                            Margin="0,0,12,0"/>
+
+                    <Button Content="Refresh" 
+                            Style="{StaticResource SecondaryButton}"
+                            Command="{Binding RefreshCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Style="{StaticResource WindowCard}" Padding="24">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" 
+                          Text="Attendance Records" 
+                          Style="{StaticResource SectionHeader}"/>
+
+                <DataGrid Grid.Row="1" 
+                          ItemsSource="{Binding AttendanceRecords}"
+                          SelectedItem="{Binding SelectedAttendance}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="None"
+                          HeadersVisibility="Column"
+                          SelectionMode="Single"
+                          CanUserResizeColumns="True"
+                          CanUserSortColumns="True"
+                          Background="White"
+                          BorderThickness="0">
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F9FAFB"/>
+                            <Setter Property="Foreground" Value="#374151"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.CellStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Date" 
+                                          Binding="{Binding Date, StringFormat=MM/dd/yyyy}" 
+                                          Width="100"/>
+                        <DataGridTextColumn Header="Start Time" 
+                                          Binding="{Binding StartTime, Converter={StaticResource TimeSpanToStringConverter}}" 
+                                          Width="100"/>
+                        <DataGridTextColumn Header="End Time" 
+                                          Binding="{Binding EndTime, Converter={StaticResource TimeSpanToStringConverter}}" 
+                                          Width="100"/>
+                        <DataGridTextColumn Header="Total Hours" 
+                                          Binding="{Binding TotalHoursWorked, StringFormat=F2}" 
+                                          Width="100"/>
+                        <DataGridTextColumn Header="Overtime" 
+                                          Binding="{Binding OvertimeHours, StringFormat=F2}" 
+                                          Width="100"/>
+                        <DataGridTextColumn Header="Hourly Rate" 
+                                          Binding="{Binding HourlyRate, StringFormat=C2}" 
+                                          Width="100"/>
+                        <DataGridTextColumn Header="Total Pay" 
+                                          Binding="{Binding TotalDailyPay, StringFormat=C2}" 
+                                          Width="120"/>
+                        <DataGridTemplateColumn Header="Actions" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Content="Edit"
+                                               Command="{Binding DataContext.LoadAttendanceForEditCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               CommandParameter="{Binding}"
+                                               Style="{StaticResource SecondaryButton}"
+                                               FontSize="12"
+                                               Padding="8,4"
+                                               Margin="0,0,4,0"/>
+                                        <Button Content="Delete"
+                                               Command="{Binding DataContext.DeleteAttendanceCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               CommandParameter="{Binding}"
+                                               Style="{StaticResource DangerButton}"
+                                               FontSize="12"
+                                               Padding="8,4"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <Border Grid.RowSpan="2"
+                Background="#80000000" 
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Panel.ZIndex="999">
+            <Border Background="White"
+                    CornerRadius="8"
+                    Width="300"
+                    Height="120"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True" 
+                                 Width="200" 
+                                 Height="4"
+                                 Background="#F3F4F6"
+                                 Foreground="#3B82F6"
+                                 Margin="0,0,0,12"/>
+                    <TextBlock Text="Processing attendance data..." 
+                               FontWeight="SemiBold"
+                               Foreground="#374151"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</Window>

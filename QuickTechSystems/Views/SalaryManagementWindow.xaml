@@ -1,0 +1,456 @@
+﻿<Window x:Class="QuickTechSystems.WPF.Views.SalaryManagementWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:QuickTechSystems.WPF.Converters"
+        Title="Salary Management"
+        Height="800"
+        Width="1200"
+        MinHeight="700"
+        MinWidth="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="#F9FAFB">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
+
+        <Style x:Key="WindowCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="20" Direction="270" ShadowDepth="4" Opacity="0.15"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+
+        <Style x:Key="MetricCard" TargetType="Border">
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#3B82F6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="6" 
+                                BorderThickness="0">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2563EB"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#1D4ED8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SuccessButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#10B981"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#059669"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#EF4444"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#DC2626"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="InputField" TargetType="TextBox">
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="40"/>
+            <Style.Triggers>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="#3B82F6"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DataGridHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F9FAFB"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource WindowCard}" Margin="0,0,0,20" Padding="24">
+            <StackPanel>
+                <TextBlock Text="{Binding EmployeeFullName, Mode=OneWay, StringFormat='Salary Management - {0}'}" 
+                           FontSize="24" 
+                           FontWeight="Bold" 
+                           Foreground="#1F2937"
+                           Margin="0,0,0,24"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource MetricCard}">
+                        <StackPanel>
+                            <TextBlock Text="Current Balance" FontWeight="SemiBold" Foreground="#6B7280" FontSize="12"/>
+                            <TextBlock Text="{Binding CurrentBalance, Mode=OneWay, StringFormat=C2}" 
+                                      FontSize="20" FontWeight="Bold" Foreground="#10B981"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="1" Style="{StaticResource MetricCard}">
+                        <StackPanel>
+                            <TextBlock Text="Total Earnings" FontWeight="SemiBold" Foreground="#6B7280" FontSize="12"/>
+                            <TextBlock Text="{Binding TotalEarnings, Mode=OneWay, StringFormat=C2}" 
+                                      FontSize="20" FontWeight="Bold" Foreground="#3B82F6"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource MetricCard}">
+                        <StackPanel>
+                            <TextBlock Text="Total Withdrawals" FontWeight="SemiBold" Foreground="#6B7280" FontSize="12"/>
+                            <TextBlock Text="{Binding TotalWithdrawals, Mode=OneWay, StringFormat=C2}" 
+                                      FontSize="20" FontWeight="Bold" Foreground="#EF4444"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="3" Style="{StaticResource MetricCard}" Margin="0">
+                        <StackPanel>
+                            <TextBlock Text="Pending Earnings" FontWeight="SemiBold" Foreground="#6B7280" FontSize="12"/>
+                            <TextBlock Text="{Binding PendingAttendanceEarnings, Mode=OneWay, StringFormat=C2}" 
+                                      FontSize="20" FontWeight="Bold" Foreground="#F59E0B"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Style="{StaticResource WindowCard}" Margin="0,0,0,20" Padding="24">
+            <StackPanel>
+                <TextBlock Text="Attendance Payroll Management" Style="{StaticResource SectionHeader}"/>
+
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" 
+                              Text="Payroll Period:" 
+                              FontWeight="SemiBold" 
+                              Foreground="#374151" 
+                              VerticalAlignment="Center"
+                              Margin="0,0,12,0"/>
+
+                    <DatePicker Grid.Column="1"
+                               SelectedDate="{Binding SelectedPayrollMonth}"
+                               DisplayDateStart="2020-01-01"
+                               DisplayDateEnd="2030-12-31"
+                               Margin="0,0,16,0"
+                               Height="40"/>
+
+                    <Button Grid.Column="2" 
+                           Content="Load Period" 
+                           Style="{StaticResource PrimaryButton}"
+                           Command="{Binding LoadUnpaidAttendanceCommand}"
+                           Margin="0,0,16,0"/>
+
+                    <Border Grid.Column="3" 
+                           Background="#EBF8FF" 
+                           BorderBrush="#3B82F6" 
+                           BorderThickness="1" 
+                           CornerRadius="6" 
+                           Padding="12"
+                           Margin="0,0,16,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📊" FontSize="16" Margin="0,0,8,0"/>
+                            <StackPanel>
+                                <TextBlock Text="{Binding UnpaidAttendanceDays, Mode=OneWay, StringFormat={}{0} Days}" 
+                                          FontWeight="Bold" FontSize="14" Foreground="#1F2937"/>
+                                <TextBlock Text="{Binding UnpaidRegularHours, Mode=OneWay, StringFormat={}{0:F1}h Regular}" 
+                                          FontSize="12" Foreground="#6B7280"/>
+                                <TextBlock Text="{Binding UnpaidOvertimeHours, Mode=OneWay, StringFormat={}{0:F1}h Overtime}" 
+                                          FontSize="12" Foreground="#F59E0B"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Grid.Column="4" 
+                           Content="Process Payroll" 
+                           Style="{StaticResource SuccessButton}"
+                           Command="{Binding ProcessAttendancePayrollCommand}"
+                           IsEnabled="{Binding HasUnpaidAttendance}"/>
+                </Grid>
+
+                <DataGrid ItemsSource="{Binding UnpaidAttendanceRecords}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="None"
+                          HeadersVisibility="Column"
+                          MaxHeight="200"
+                          Background="White"
+                          BorderThickness="1"
+                          BorderBrush="#E5E7EB"
+                          ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}"
+                          CellStyle="{StaticResource DataGridCellStyle}">
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Date" 
+                                          Binding="{Binding Date, StringFormat=MM/dd/yyyy}" 
+                                          Width="80"/>
+                        <DataGridTextColumn Header="Start" 
+                                          Binding="{Binding StartTime, Converter={StaticResource TimeSpanToStringConverter}}" 
+                                          Width="70"/>
+                        <DataGridTextColumn Header="End" 
+                                          Binding="{Binding EndTime, Converter={StaticResource TimeSpanToStringConverter}}" 
+                                          Width="70"/>
+                        <DataGridTextColumn Header="Regular" 
+                                          Binding="{Binding RegularHours, StringFormat=F1}" 
+                                          Width="70"/>
+                        <DataGridTextColumn Header="Overtime" 
+                                          Binding="{Binding OvertimeHours, StringFormat=F1}" 
+                                          Width="80"/>
+                        <DataGridTextColumn Header="Rate" 
+                                          Binding="{Binding HourlyRate, StringFormat=C2}" 
+                                          Width="70"/>
+                        <DataGridTextColumn Header="Total Pay" 
+                                          Binding="{Binding TotalDailyPay, StringFormat=C2}" 
+                                          Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource WindowCard}" Margin="0,0,0,20" Padding="24">
+            <StackPanel>
+                <TextBlock Text="Withdrawal Management" Style="{StaticResource SectionHeader}"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Withdrawal Amount" 
+                                  FontWeight="SemiBold" 
+                                  Foreground="#374151" 
+                                  Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding WithdrawalAmount}" 
+                                Style="{StaticResource InputField}"
+                                Margin="0,0,0,8"/>
+
+                        <TextBlock Text="Notes" 
+                                  FontWeight="SemiBold" 
+                                  Foreground="#374151" 
+                                  Margin="0,0,0,6"/>
+                        <TextBox Text="{Binding WithdrawalNotes}" 
+                                Style="{StaticResource InputField}"
+                                Height="60"
+                                TextWrapping="Wrap"
+                                AcceptsReturn="True"
+                                VerticalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="2" 
+                           Content="Process Withdrawal" 
+                           Style="{StaticResource DangerButton}"
+                           Command="{Binding ProcessWithdrawalCommand}"
+                           IsEnabled="{Binding CanProcessWithdrawal}"
+                           VerticalAlignment="Top"
+                           Height="40"/>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                    <Button Content="Refresh Data" 
+                            Style="{StaticResource PrimaryButton}"
+                            Command="{Binding RefreshDataCommand}"
+                            Margin="0,0,12,0"/>
+
+                    <Button Content="Clear Form" 
+                            Style="{StaticResource PrimaryButton}"
+                            Command="{Binding ClearWithdrawalFormCommand}"
+                            Background="#6B7280"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="3" Style="{StaticResource WindowCard}" Padding="24">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" 
+                          Text="Transaction History" 
+                          Style="{StaticResource SectionHeader}"/>
+
+                <DataGrid Grid.Row="1" 
+                          ItemsSource="{Binding SalaryTransactions}"
+                          SelectedItem="{Binding SelectedTransaction}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="None"
+                          HeadersVisibility="Column"
+                          SelectionMode="Single"
+                          CanUserResizeColumns="True"
+                          CanUserSortColumns="True"
+                          Background="White"
+                          BorderThickness="0">
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F9FAFB"/>
+                            <Setter Property="Foreground" Value="#374151"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#E5E7EB"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.CellStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Date" 
+                                          Binding="{Binding TransactionDate, StringFormat=MM/dd/yyyy HH:mm}" 
+                                          Width="150"/>
+                        <DataGridTextColumn Header="Type" 
+                                          Binding="{Binding TransactionType}" 
+                                          Width="100"/>
+                        <DataGridTextColumn Header="Amount" 
+                                          Binding="{Binding Amount, StringFormat=C2}" 
+                                          Width="120">
+                            <DataGridTextColumn.CellStyle>
+                                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding TransactionType}" Value="Withdrawal">
+                                            <Setter Property="Foreground" Value="#EF4444"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding TransactionType}" Value="Payroll">
+                                            <Setter Property="Foreground" Value="#10B981"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Notes" 
+                                          Binding="{Binding Notes}" 
+                                          Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <Border Grid.RowSpan="4"
+                Background="#80000000" 
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Panel.ZIndex="999">
+            <Border Background="White"
+                    CornerRadius="8"
+                    Width="300"
+                    Height="120"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True" 
+                                 Width="200" 
+                                 Height="4"
+                                 Background="#F3F4F6"
+                                 Foreground="#3B82F6"
+                                 Margin="0,0,0,12"/>
+                    <TextBlock Text="Processing payroll operations..." 
+                               FontWeight="SemiBold"
+                               Foreground="#374151"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Border>
+    </Grid>
+</Window>

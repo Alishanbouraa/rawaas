@@ -1,0 +1,337 @@
+﻿<UserControl x:Class="QuickTechSystems.WPF.Views.TransactionHistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:QuickTechSystems.WPF.Converters"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <!-- Main Grid with shared size scope for consistent proportions -->
+    <Grid Grid.IsSharedSizeScope="True">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid Style="{StaticResource ResponsivePageLayout}" x:Name="ContentGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- Filter Controls Row -->
+                    <RowDefinition Height="*"/>
+                    <!-- DataGrid -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Pagination Controls -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Error Message -->
+                </Grid.RowDefinitions>
+
+                <!-- RESPONSIVE FILTER ROW - Using shared size groups and proportional sizing -->
+                <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="DateRange"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Categories"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="Employees"/>
+                        <ColumnDefinition Width="*" MinWidth="100" SharedSizeGroup="Search"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="FinancialSummary"/>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="ActionButtons"/>
+                    </Grid.ColumnDefinitions>
+
+                    <DockPanel Grid.Column="0" LastChildFill="True" Margin="0,0,8,0" VerticalAlignment="Center">
+                        <DatePicker SelectedDate="{Binding StartDate}" Style="{StaticResource ModernDatePicker}" 
+                    DockPanel.Dock="Left" MinWidth="90" MaxWidth="120" Width="Auto"/>
+                        <TextBlock Text="to" VerticalAlignment="Center" Margin="4,0" DockPanel.Dock="Left"/>
+                        <DatePicker SelectedDate="{Binding EndDate}" Style="{StaticResource ModernDatePicker}" 
+                    DockPanel.Dock="Left" MinWidth="90" MaxWidth="120" Width="Auto"/>
+                    </DockPanel>
+
+                    <ComboBox Grid.Column="1" 
+              Style="{StaticResource ModernComboBox}"
+              ItemsSource="{Binding Categories}"
+              SelectedItem="{Binding SelectedCategory}"
+              DisplayMemberPath="Name"
+              MinWidth="100" MaxWidth="200" Width="Auto"
+              Margin="8,0"
+              VerticalAlignment="Center"/>
+
+                    <ComboBox Grid.Column="2" 
+              Style="{StaticResource ModernComboBox}"
+              ItemsSource="{Binding Employees}"
+              SelectedItem="{Binding SelectedEmployee}"
+              DisplayMemberPath="FullName"
+              MinWidth="100" MaxWidth="200" Width="Auto"
+              Margin="8,0"
+              VerticalAlignment="Center"/>
+
+                    <TextBox Grid.Column="3"
+             Style="{StaticResource SearchTextBox}"
+             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+             TextChanged="SearchBox_TextChanged"
+             Tag="{DynamicResource TransactionHistory_SearchPlaceholder}"
+             MinWidth="100" MaxWidth="400"
+             Margin="8,0"
+             VerticalAlignment="Center">
+                        <TextBox.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </TextBox.Resources>
+                    </TextBox>
+
+                    <StackPanel Grid.Column="4" 
+               Orientation="Horizontal"
+               Margin="8,0"
+               VerticalAlignment="Center">
+                        <TextBlock Text="Total Sales: " Foreground="{StaticResource TextSecondaryColor}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding TotalSales, StringFormat={}{0:C2}, Mode=OneWay}" 
+                   Foreground="{StaticResource PrimaryColor}" 
+                   FontWeight="SemiBold" 
+                   VerticalAlignment="Center"
+                   Margin="0,0,16,0"/>
+                        <TextBlock Text="Total Profit: " Foreground="{StaticResource TextSecondaryColor}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding TotalProfit, StringFormat={}{0:C2}, Mode=OneWay}" 
+                   Foreground="{StaticResource SuccessColor}" 
+                   FontWeight="SemiBold" 
+                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <WrapPanel Grid.Column="5" 
+               Orientation="Horizontal" 
+               VerticalAlignment="Center"
+               Margin="8,0,0,0">
+                        <Button Content="Refresh"
+                Style="{StaticResource SecondaryButtonStyle}"
+                Command="{Binding RefreshCommand}"
+                Margin="0,0,8,0"
+                Padding="12,6"
+                Height="32"/>
+                        <Button Content="Export"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Command="{Binding ExportCommand}"
+                Margin="0,0,8,0"
+                Padding="12,6"
+                Height="32"/>
+                        <Button Content="Print"
+                Style="{StaticResource AccentButtonStyle}"
+                Command="{Binding PrintReportCommand}"
+                Padding="12,6"
+                Height="32"/>
+                    </WrapPanel>
+                </Grid>
+                <!-- DataGrid with proportional column sizing -->
+                <DataGrid Grid.Row="1"
+                          Style="{StaticResource ResponsiveDataGrid}"
+                          ColumnHeaderStyle="{StaticResource ModernDataGridColumnHeader}"
+                          CellStyle="{StaticResource ModernDataGridCell}"
+                          ItemsSource="{Binding FilteredTransactions}"
+                          Margin="0,0,0,16"
+                          MinHeight="350"
+                          x:Name="TransactionsDataGrid"
+                          AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <!-- Using proportional widths and star sizing for responsive columns -->
+                        <DataGridTextColumn Header="{DynamicResource TransactionHistory_Column_ID}" 
+                                           Binding="{Binding TransactionId}" 
+                                           Width="70" 
+                                           SortMemberPath="TransactionId"/>
+
+                        <DataGridTextColumn Header="{DynamicResource TransactionHistory_Column_Date}" 
+                                           Binding="{Binding TransactionDate, StringFormat=g}" 
+                                           Width="130" 
+                                           SortMemberPath="TransactionDate"/>
+
+                        <DataGridTextColumn Header="{DynamicResource TransactionHistory_Column_Customer}" 
+                                           Binding="{Binding CustomerName}" 
+                                           Width="*" 
+                                           MinWidth="100"
+                                           SortMemberPath="CustomerName"/>
+
+                        <DataGridTextColumn Header="{DynamicResource TransactionHistory_Column_Type}" 
+                                           Binding="{Binding TransactionType}" 
+                                           Width="100" 
+                                           SortMemberPath="TransactionType"/>
+
+                        <DataGridTextColumn Header="{DynamicResource TransactionHistory_Column_Items}" 
+                                           Binding="{Binding Details.Count}" 
+                                           Width="80" 
+                                           SortMemberPath="Details.Count"/>
+
+                        <DataGridTextColumn Header="{DynamicResource TransactionHistory_Column_Total}" 
+                                           Binding="{Binding TotalAmount, StringFormat=C2}" 
+                                           Width="100" 
+                                           SortMemberPath="TotalAmount">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextAlignment" Value="Right"/>
+                                    <Setter Property="Padding" Value="0,0,8,0"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="{DynamicResource TransactionHistory_Column_Status}" 
+                                           Binding="{Binding Status}" 
+                                           Width="90" 
+                                           SortMemberPath="Status"/>
+
+                        <DataGridTextColumn Header="{DynamicResource TransactionHistory_Column_PaymentMethod}" 
+                                           Binding="{Binding PaymentMethod}" 
+                                           Width="120" 
+                                           SortMemberPath="PaymentMethod">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="CustomerDebt">
+                                            <Setter Property="Foreground" Value="#e74c3c"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Trigger>
+                                        <Trigger Property="Text" Value="Cash">
+                                            <Setter Property="Foreground" Value="#2ecc71"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="{DynamicResource TransactionHistory_Column_ProcessedBy}" 
+                                           Binding="{Binding CashierName}" 
+                                           Width="120" 
+                                           SortMemberPath="CashierName"/>
+
+                        <DataGridTextColumn Header="{DynamicResource TransactionHistory_Column_Role}" 
+                                           Binding="{Binding CashierRole}" 
+                                           Width="90" 
+                                           SortMemberPath="CashierRole"/>
+
+                        <DataGridTemplateColumn Width="160">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="View Details"
+                        Style="{StaticResource TextButtonStyle}"
+                        Foreground="{StaticResource PrimaryColor}"
+                        Command="{Binding DataContext.ViewTransactionDetailsCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                        CommandParameter="{Binding}"
+                        Padding="6,2"
+                        Margin="0,0,8,0"/>
+                                        <Button Content="{DynamicResource TransactionHistory_DeleteButton}"
+                        Style="{StaticResource TextButtonStyle}"
+                        Foreground="{StaticResource DangerColor}"
+                        Command="{Binding DataContext.DeleteTransactionCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                        CommandParameter="{Binding}"
+                        Padding="6,2"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Simplified Pagination Controls - Row 2 -->
+                <Grid Grid.Row="2" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Page Size Selector -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- Page Navigation Buttons -->
+                        <ColumnDefinition Width="Auto"/>
+                        <!-- Page Info Display -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Page Size Selector -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Items per page:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <ComboBox ItemsSource="{Binding AvailablePageSizes}" 
+                                  SelectedItem="{Binding PageSize}" 
+                                  Width="65" 
+                                  Style="{StaticResource ModernComboBox}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" HorizontalAlignment="Center"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- Page Navigation Controls - Simplified -->
+                    <StackPanel Grid.Column="1" 
+                                HorizontalAlignment="Center" 
+                                Orientation="Horizontal" 
+                                VerticalAlignment="Center">
+                        <!-- Previous Button -->
+                        <Button Content="Previous" 
+                                Command="{Binding PreviousPageCommand}" 
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Margin="2,0"
+                                Padding="8,4"
+                                Height="28"/>
+
+                        <!-- Current Page Display -->
+                        <Border Background="{StaticResource PrimaryColor}" 
+                                CornerRadius="4" 
+                                Margin="8,0" 
+                                Padding="12,4">
+                            <TextBlock Text="{Binding CurrentPage}" 
+                                       Foreground="White" 
+                                       FontWeight="Bold"/>
+                        </Border>
+
+                        <!-- Next Button -->
+                        <Button Content="Next" 
+                                Command="{Binding NextPageCommand}" 
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Margin="2,0"
+                                Padding="8,4"
+                                Height="28"/>
+                    </StackPanel>
+
+                    <!-- Page Information -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Page " Foreground="{StaticResource TextSecondaryColor}"/>
+                        <TextBlock Text="{Binding CurrentPage}" Foreground="{StaticResource TextSecondaryColor}"/>
+                        <TextBlock Text=" of " Foreground="{StaticResource TextSecondaryColor}"/>
+                        <TextBlock Text="{Binding TotalPages}" Foreground="{StaticResource TextSecondaryColor}"/>
+                        <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryColor}"/>
+                        <TextBlock Text="{Binding TotalTransactions}" Foreground="{StaticResource TextSecondaryColor}"/>
+                        <TextBlock Text=" total)" Foreground="{StaticResource TextSecondaryColor}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Error Message Box - Now in Row 3 -->
+                <Border Grid.Row="3"
+                        Background="{StaticResource BorderColor}"
+                        BorderBrush="{StaticResource DangerColor}"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Padding="12,8"
+                        Margin="0,0,0,8"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
+                    <TextBlock Text="{Binding ErrorMessage}" 
+                               Foreground="{StaticResource DangerColor}" 
+                               Style="{StaticResource BodySmall}"
+                               VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- Loading Overlay - Update RowSpan to cover all 4 rows -->
+                <Border Grid.Row="0" 
+                        Grid.RowSpan="4" 
+                        Style="{StaticResource LoadingOverlay}" 
+                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel HorizontalAlignment="Center" 
+                                VerticalAlignment="Center">
+                        <ProgressBar Style="{StaticResource ModernProgressBar}" 
+                                     IsIndeterminate="True" 
+                                     Width="100" 
+                                     Margin="0,0,0,12"/>
+                        <TextBlock Text="{DynamicResource TransactionHistory_Loading}" 
+                                   Foreground="White" 
+                                   FontSize="14" 
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
